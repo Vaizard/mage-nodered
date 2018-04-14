@@ -5,8 +5,8 @@ Documentation=http://nodered.org/docs
 
 [Service]
 Environment="NODE_OPTIONS=--max-old-space-size=128"
-ExecStart=/usr/bin/node $OPTIONS red.js -v
-WorkingDirectory=/opt/node-red
+ExecStart=node-red -v
+WorkingDirectory=/home/node-red/.node-red
 User=node-red
 Group=users
 Nice=10
