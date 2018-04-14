@@ -26,6 +26,16 @@
 
 - name: Install "Node-RED" node.js package globally.
   command: npm install -g --unsafe-perm node-red
+
+- name: Install "node-red-node-email"
+  command: npm install -g node-red-node-email
+
+- name: Install "node-red-contrib-matrixbot"
+  command: npm install -g node-red-contrib-matrixbot
+
+- name: Install "node-red-node-ping"
+  command: npm install -g node-red-node-ping
+  
 #  npm:
 #    name: node-red
 #    global: yes
