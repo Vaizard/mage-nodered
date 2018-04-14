@@ -53,4 +53,19 @@
     enabled=yes
     state=started
 
+- name: Create nginx proxy
+  template:
+    src: nodered-nginx.conf
+    dest: /etc/nginx/sites-available/node-red
 
+- name: Enable node-red nginx config
+  file:
+    src: /etc/nginx/sites-available/node-red
+    dest: /etc/nginx/sites-enabled/node-red
+    state: link
+
+- name: Restart nginx
+  service: >
+    name=nginx
+    enabled=yes
+    state=restarted
