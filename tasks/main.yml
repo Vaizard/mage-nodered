@@ -1,0 +1,55 @@
+---
+
+- name: Add nodesource apt_keys
+  apt_key:
+    url: "https://deb.nodesource.com/gpgkey/nodesource.gpg.key"
+    state: present
+
+- apt_repository:
+    repo: "deb https://deb.nodesource.com/node_8.x {{ ansible_distribution_release }} main"
+    state: present
+
+
+- name: Install node-red dependencies
+  action: apt pkg={{ item }} state=latest update_cache=yes
+  with_items:
+   - nodejs
+   - nginx
+
+- name: Create non-priviledged user to run node-red
+  user: >
+    name=node-red
+    createhome=no
+    append=yes
+    groups=users
+    
+- name: Clone node-red from github
+  git: repo=https://github.com/node-red/node-red.git dest=/opt/node-red version={{ nodered_version }}
+
+- name: Setup permissions of the node-red installation
+  sudo: yes
+  file: >
+    dest=/opt/node-red
+    owner=node-red
+    group=users
+    recurse=yes
+    
+- name: Call npm install
+  command: npm install --production
+  register: npm_install_result
+  changed_when: npm_install_result.stdout != ""
+  args:
+    chdir: /opt/node-red 
+  
+- name: Setup a systemd service for node-red
+  template: >
+    src=nodered.service.j2
+    dest=/usr/lib/systemd/system/node-red.service
+
+- name: Enable and start the node-red systemd service
+  service: >
+    name=node-red
+    enabled=yes
+    state=started
+
+
