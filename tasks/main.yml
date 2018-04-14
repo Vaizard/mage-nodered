@@ -20,34 +20,40 @@
 - name: Create non-priviledged user to run node-red
   user: >
     name=node-red
-    createhome=no
     append=yes
     groups=users
-    
-- name: Clone node-red from github
-  git: repo=https://github.com/node-red/node-red.git dest=/opt/node-red version={{ nodered_version }}
 
-- name: Globally install grunt-cli
-  command: npm install -g grunt-cli
-  args:
-    chdir: /opt/node-red 
 
-- name: Call grunt-build
-  command: grunt build
-  args:
-    chdir: /opt/node-red 
+- name: Install "Node-RED" node.js package globally.
+  npm:
+    name: node-red
+    global: yes
+    state: latest
 
-- name: Call npm install
-  command: npm install
-  args:
-    chdir: /opt/node-red 
+#- name: Clone node-red from github
+#  git: repo=https://github.com/node-red/node-red.git dest=/opt/node-red version={{ nodered_version }}
 
-- name: Setup permissions of the node-red installation
-  file: >
-    dest=/opt/node-red
-    owner=node-red
-    group=users
-    recurse=yes
+#- name: Globally install grunt-cli
+#  command: npm install -g grunt-cli
+#  args:
+#    chdir: /opt/node-red 
+
+#- name: Call grunt-build
+#  command: grunt build
+#  args:
+#    chdir: /opt/node-red 
+
+#- name: Call npm install
+#  command: npm install
+#  args:
+#    chdir: /opt/node-red 
+
+#- name: Setup permissions of the node-red installation
+#  file: >
+#    dest=/opt/node-red
+#    owner=node-red
+#    group=users
+#    recurse=yes
 
 - name: Setup a systemd service for node-red
   template: >
@@ -70,6 +76,11 @@
     src: /etc/nginx/sites-available/node-red
     dest: /etc/nginx/sites-enabled/node-red
     state: link
+
+- name: Restart node-RED
+  service: >
+    name=node-red
+    state=restarted
 
 - name: Restart nginx
   service: >
