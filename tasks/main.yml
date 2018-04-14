@@ -26,14 +26,6 @@
     
 - name: Clone node-red from github
   git: repo=https://github.com/node-red/node-red.git dest=/opt/node-red version={{ nodered_version }}
-
-- name: Setup permissions of the node-red installation
-  sudo: yes
-  file: >
-    dest=/opt/node-red
-    owner=node-red
-    group=users
-    recurse=yes
     
 - name: Call npm install
   command: npm install --production
@@ -41,7 +33,14 @@
   changed_when: npm_install_result.stdout != ""
   args:
     chdir: /opt/node-red 
-  
+
+- name: Setup permissions of the node-red installation
+  file: >
+    dest=/opt/node-red
+    owner=node-red
+    group=users
+    recurse=yes
+
 - name: Setup a systemd service for node-red
   template: >
     src=nodered.service.j2
