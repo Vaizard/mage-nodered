@@ -1,8 +1,10 @@
 [Unit]
-Description=Node-RED service
+Description=Node-RED graphical event wiring tool.
+Wants=network.target
+Documentation=http://nodered.org/docs
 
 [Service]
-Environment="OPTIONS=--max-old-space-size=128"
+Environment="NODE_OPTIONS=--max-old-space-size=128"
 ExecStart=/usr/bin/node $OPTIONS red.js -v
 WorkingDirectory=/opt/node-red
 User=node-red
@@ -10,6 +12,7 @@ Group=users
 Nice=10
 SyslogIdentifier=Node-RED
 StandardOutput=syslog
+StandardError=syslog
 Restart=on-failure
 KillSignal=SIGINT
 
