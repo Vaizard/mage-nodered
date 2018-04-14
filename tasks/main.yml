@@ -15,6 +15,7 @@
   with_items:
    - nodejs
    - nginx
+   - libavahi-compat-libdnssd-dev
 
 - name: Create non-priviledged user to run node-red
   user: >
