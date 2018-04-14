@@ -26,11 +26,19 @@
     
 - name: Clone node-red from github
   git: repo=https://github.com/node-red/node-red.git dest=/opt/node-red version={{ nodered_version }}
-    
+
+- name: Globally install grunt-cli
+  command: npm install -g grunt-cli
+  args:
+    chdir: /opt/node-red 
+
+- name: Call grunt-build
+  command: grunt build
+  args:
+    chdir: /opt/node-red 
+
 - name: Call npm install
-  command: npm install --production
-  register: npm_install_result
-  changed_when: npm_install_result.stdout != ""
+  command: npm install
   args:
     chdir: /opt/node-red 
 
