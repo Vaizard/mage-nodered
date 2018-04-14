@@ -4,17 +4,18 @@ Wants=network.target
 Documentation=http://nodered.org/docs
 
 [Service]
-Environment="NODE_OPTIONS=--max-old-space-size=128"
-ExecStart=/usr/bin/node-red -v
-WorkingDirectory=/home/node-red/.node-red
+Type=simple
 User=node-red
 Group=users
-Nice=10
+WorkingDirectory=/home/node-red
+Nice=5
+Environment="NODE_OPTIONS=--max_old_space_size=256"
+Environment="NODE_RED_OPTIONS=-v"
+ExecStart=/usr/bin/env node-red $NODE_OPTIONS $NODE_RED_OPTIONS
+KillSignal=SIGINT
+Restart=on-failure
 SyslogIdentifier=Node-RED
 StandardOutput=syslog
-StandardError=syslog
-Restart=on-failure
-KillSignal=SIGINT
 
 [Install]
 WantedBy=multi-user.target
