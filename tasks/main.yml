@@ -25,10 +25,11 @@
 
 
 - name: Install "Node-RED" node.js package globally.
-  npm:
-    name: node-red
-    global: yes
-    state: latest
+  command: npm install -g --unsafe-perm node-red
+#  npm:
+#    name: node-red
+#    global: yes
+#    state: latest
 
 #- name: Clone node-red from github
 #  git: repo=https://github.com/node-red/node-red.git dest=/opt/node-red version={{ nodered_version }}
