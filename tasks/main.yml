@@ -45,7 +45,7 @@
 - name: Setup a systemd service for node-red
   template: >
     src=nodered.service.j2
-    dest=/usr/lib/systemd/system/node-red.service
+    dest=/lib/systemd/system/node-red.service
 
 - name: Enable and start the node-red systemd service
   service: >
