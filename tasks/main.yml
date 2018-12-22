@@ -6,7 +6,7 @@
     state: present
 
 - apt_repository:
-    repo: "deb https://deb.nodesource.com/node_8.x {{ ansible_distribution_release }} main"
+    repo: "deb https://deb.nodesource.com/node_{{ nodejs_major_version }}.x {{ ansible_distribution_release }} main"
     state: present
 
 
@@ -23,48 +23,23 @@
     append=yes
     groups=users
 
-
-- name: Install "Node-RED" node.js package globally.
+- name: "Install Node-RED node.js package globally. Takes a few minutes."
   command: npm install -g --unsafe-perm node-red
-
-- name: Install "node-red-node-email"
-  command: npm install -g node-red-node-email
-
-- name: Install "node-red-contrib-matrixbot"
-  command: npm install -g node-red-contrib-matrixbot
-
-- name: Install "node-red-node-ping"
-  command: npm install -g node-red-node-ping
   
-#  npm:
-#    name: node-red
-#    global: yes
-#    state: latest
+# TODO: replace the above line, needs ansible 2.8
+# - name: Install "node-red" node.js package. Takes a few minutes!
+#   npm:
+#     name: node-red
+#     unsafe_perm: true
+#     global: yes
+#     state: latest
 
-#- name: Clone node-red from github
-#  git: repo=https://github.com/node-red/node-red.git dest=/opt/node-red version={{ nodered_version }}
-
-#- name: Globally install grunt-cli
-#  command: npm install -g grunt-cli
-#  args:
-#    chdir: /opt/node-red 
-
-#- name: Call grunt-build
-#  command: grunt build
-#  args:
-#    chdir: /opt/node-red 
-
-#- name: Call npm install
-#  command: npm install
-#  args:
-#    chdir: /opt/node-red 
-
-#- name: Setup permissions of the node-red installation
-#  file: >
-#    dest=/opt/node-red
-#    owner=node-red
-#    group=users
-#    recurse=yes
+- name: "Install Node-RED packages (flows, nodes)"
+  npm:
+    name: "{{ item }}"
+    state: latest
+  #become: yes
+  with_items: "{{ nodered_packages }}"
 
 - name: Setup a systemd service for node-red
   template: >
