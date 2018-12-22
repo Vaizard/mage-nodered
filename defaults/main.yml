@@ -1,2 +1,6 @@
 ---
-nodered_version: 0.18.4
+nodejs_major_version: 10
+nodered_packages:
+  - node-red-node-email
+  - node-red-contrib-matrixbot
+  - node-red-node-ping
