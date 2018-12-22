@@ -14,7 +14,7 @@
   action: apt pkg={{ item }} state=latest update_cache=yes
   with_items:
    - nodejs
-   - nginx
+   - npm
    - libavahi-compat-libdnssd-dev
 
 - name: Create non-priviledged user to run node-red
@@ -23,6 +23,10 @@
     append=yes
     groups=users
 
+# npm normally installs its packages into your current directory. The -g flag is used to install packages 'globally' 
+# so they're placed in standard system locations such as /usr/local/bin. The --unsafe-perm flag helps us avoid some
+# errors that can pop up when npm tries to compile native modules (modules written in a compiled language such as C
+# or C++ vs. JavaScript).
 - name: "Install Node-RED node.js package globally. Takes a few minutes."
   command: npm install -g --unsafe-perm node-red
   
@@ -51,25 +55,26 @@
     name=node-red
     enabled=yes
     state=started
+# Node-RED defaults to using port 1880
 
-- name: Create nginx proxy
-  template:
-    src: nodered-nginx.conf
-    dest: /etc/nginx/sites-available/node-red
+#- name: Create nginx proxy
+#  template:
+#    src: nodered-nginx.conf
+#    dest: /etc/nginx/sites-available/node-red
 
-- name: Enable node-red nginx config
-  file:
-    src: /etc/nginx/sites-available/node-red
-    dest: /etc/nginx/sites-enabled/node-red
-    state: link
+#- name: Enable node-red nginx config
+#  file:
+#    src: /etc/nginx/sites-available/node-red
+#    dest: /etc/nginx/sites-enabled/node-red
+#    state: link
 
 - name: Restart node-RED
   service: >
     name=node-red
     state=restarted
 
-- name: Restart nginx
-  service: >
-    name=nginx
-    enabled=yes
-    state=restarted
+#- name: Restart nginx
+# service: >
+#    name=nginx
+#    enabled=yes
+#    state=restarted
