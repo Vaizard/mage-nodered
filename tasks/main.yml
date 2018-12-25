@@ -1,5 +1,8 @@
 ---
 
+# WARNING. Before changing the order of the tasks here, make sure you consider the implications. There are many task
+# orders that won't work and this isn't one of them because of an hour of testing.
+
 - name: Add nodesource apt_keys
   apt_key:
     url: "https://deb.nodesource.com/gpgkey/nodesource.gpg.key"
@@ -11,11 +14,7 @@
 
 
 - name: Install node-red dependencies
-  action: apt pkg={{ item }} state=latest update_cache=yes
-  with_items:
-   - nodejs
-   - npm
-   - libavahi-compat-libdnssd-dev
+  action: apt pkg="{{ nodered_dependencies + [ 'nodejs' ] }}" state=latest update_cache=yes
 
 - name: Create non-priviledged user to run node-red
   user: >
@@ -27,9 +26,15 @@
 # so they're placed in standard system locations such as /usr/local/bin. The --unsafe-perm flag helps us avoid some
 # errors that can pop up when npm tries to compile native modules (modules written in a compiled language such as C
 # or C++ vs. JavaScript).
+
 - name: "Install Node-RED node.js package globally. Takes a few minutes."
-  command: npm install -g --unsafe-perm node-red
-  
+  command: npm install -g --unsafe-perm node-red node-red-admin
+
+- name: "Install Node-RED packages (flows, nodes) requiring unsafe-perm"
+  command: "npm install -g --unsafe-perm {{ item }}"
+  with_items: "{{ nodered_unsafe_packages }}"
+
+
 # TODO: replace the above line, needs ansible 2.8
 # - name: Install "node-red" node.js package. Takes a few minutes!
 #   npm:
@@ -42,39 +47,59 @@
   npm:
     name: "{{ item }}"
     state: latest
-  #become: yes
+    global: yes
   with_items: "{{ nodered_packages }}"
 
-- name: Setup a systemd service for node-red
-  template: >
-    src=nodered.service.j2
-    dest=/lib/systemd/system/node-red.service
+- name: "Get password hashes for admin users"
+  shell: echo "{{ item.pass }}" | node-red-admin hash-pw | sed -n 1p | sed 's/[^ ]* //'
+  register: admins
+  with_items: "{{ nodered_admin_users }}"
+
+- name: "Get password hash for node user"
+  shell: echo "{{ nodered_nodeauth_pass }}" | node-red-admin hash-pw | sed -n 1p | sed 's/[^ ]* //'
+  register: nodeauth
+
+#- debug: var=nodeauth
 
 - name: Enable and start the node-red systemd service
-  service: >
-    name=node-red
-    enabled=yes
-    state=started
-# Node-RED defaults to using port 1880
+  systemd: name=node-red enabled=yes state=started
 
-#- name: Create nginx proxy
-#  template:
-#    src: nodered-nginx.conf
-#    dest: /etc/nginx/sites-available/node-red
+- name: "Install Node-RED packages (flows, nodes) requiring local installation"
+  command: "npm install --unsafe-perm {{ item }}"
+  args:
+    chdir: /home/node-red/.node-red
+  with_items: "{{ nodered_local_packages }}"
 
-#- name: Enable node-red nginx config
-#  file:
-#    src: /etc/nginx/sites-available/node-red
-#    dest: /etc/nginx/sites-enabled/node-red
-#    state: link
+- name: Configure settings.js
+  blockinfile:
+    path: /home/node-red/.node-red/settings.js
+    insertbefore: '.*To password protect the node-defined HTTP endpoints.*'
+    marker: "    // {mark} ANSIBLE MANAGED BLOCK - credentials"
+    block: |2
+          adminAuth: {
+              type: "credentials",
+              users: [
+              {%- for loopitem in admins.results %}{
+                  username: "{{ loopitem._ansible_item_label.user }}",
+                  password: "{{ loopitem.stdout }}",
+                  permissions: "{{ loopitem._ansible_item_label.perm | default(nodered_default_adminperm) }}"
+              }
+              {%- if not loop.last %},{% endif %}
+              {% endfor %}
+          ]
+          },
+          {% if nodered_nodeauth_user | length and nodered_nodeauth_pass | length %}httpNodeAuth: {user:"{{ nodered_nodeauth_user }}",pass:"{{ nodeauth.stdout }}"},{% endif %}
+
+- name: Configure bind host
+  blockinfile:
+    path: /home/node-red/.node-red/settings.js
+    insertafter: '    //uiHost: "127.0.0.1",'
+    marker: "    // {mark} ANSIBLE MANAGED BLOCK - credentials"
+    block: |2
+          {% if nodered_ip and nodered_ip | length > 0 %}uiHost: "{{ nodered_ip }}",{% endif %}
+
+- name: Setup a systemd service for node-red
+  template: src=nodered.service.j2 dest=/lib/systemd/system/node-red.service
 
 - name: Restart node-RED
-  service: >
-    name=node-red
-    state=restarted
-
-#- name: Restart nginx
-# service: >
-#    name=nginx
-#    enabled=yes
-#    state=restarted
+  systemd: name=node-red state=restarted daemon_reload=yes

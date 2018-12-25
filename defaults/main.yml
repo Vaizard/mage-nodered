@@ -1,6 +1,77 @@
 ---
 nodejs_major_version: 10
+nodered_port: 2880               # Node-Red defaults to 1880, evading to a different port by default.
+nodered_ip: ""                   # Empty string (default) to listen on all interfaces, 127.0.0.1 to listen locally.
+nodered_default_adminperm: "*"   # Possible values are '*' or 'read'.
+
 nodered_packages:
-  - node-red-node-email
+  - node-red-contrib--cron-pkjq
+  - node-red-contrib-browser-utils
+  - node-red-contrib-deadmanswitch
+  - node-red-contrib-edge-trigger
+  - node-red-contrib-ftp-sftp
+  - node-red-contrib-func-exec
+  - node-red-contrib-github
+  - node-red-contrib-google-tts
+  - node-red-contrib-http-request
+  - node-red-contrib-httpauth
   - node-red-contrib-matrixbot
+  - node-red-contrib-moment
+  - node-red-contrib-mqtt-broker
+  - node-red-contrib-mssql-plus
+  - node-red-contrib-mysensors
+  - node-red-contrib-onvif
+  - node-red-contrib-os
+  - node-red-contrib-play-audio
+  - node-red-contrib-postgres
+  - node-red-contrib-python3-function
+  - node-red-contrib-pythonshell
+  - node-red-contrib-redis
+  - node-red-contrib-string
+  - node-red-contrib-viseo-ethjs
+  - node-red-contrib-viseo-file
+  - node-red-contrib-viseo-google-spreadsheet
+  - node-red-contrib-viseo-log
+  - node-red-contrib-viseo-loop
+  - node-red-contrib-viseo-qrcode
+  - node-red-contrib-viseo-trello
+  - node-red-node-base64
+  - node-red-node-daemon
+  - node-red-node-email
+  - node-red-node-feedparser
+  - node-red-node-google
+  - node-red-node-mysql
+  - node-red-node-openweathermap
   - node-red-node-ping
+  - node-red-node-random
+  - node-red-node-rbe
+  - node-red-node-watson
+  - node-red-node-wol
+
+nodered_unsafe_packages:
+  - node-red-contrib-zeromq
+  - node-red-contrib-mysensors
+
+nodered_local_packages:
+  - node-red-contrib-gpio
+  - node-red-contrib-ttn
+
+nodered_dependencies:
+  - libavahi-compat-libdnssd-dev
+  - libzmq5
+
+# At least one admin user is required, the role will intentionally fail if none provided
+nodered_admin_users:
+  - user: "admin"
+    pass: "adminssecretpassword"
+    perm: "*"
+
+# Basic auth (only one user allowed) provides basic protection of all node paths. You will probably want to use something 
+# more flexible, with a fine grained control, such as the node-red-contrib-auth. Using the build-in single-user basic auth
+# and node-red-contrib-auth will most likely cause the latter to fail. If you want to use node-red-contrib-auth, just set
+# the two values below to empty strings.
+# NOTE that basic authentication is only secure if traffic is forced over https. While Node-red has the ability to run over
+# https only, any sane installation should have a propper reverse proxy infront of it.
+nodered_nodeauth_user: "mylogin"
+nodered_nodeauth_pass: "mysecretpassword"
+

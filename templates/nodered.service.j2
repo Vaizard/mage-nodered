@@ -10,7 +10,7 @@ Group=users
 WorkingDirectory=/home/node-red
 Nice=5
 Environment="NODE_OPTIONS=--max_old_space_size=256"
-Environment="NODE_RED_OPTIONS=-v"
+Environment="NODE_RED_OPTIONS=-v -p {{ nodered_port }}"
 ExecStart=/usr/bin/env node-red $NODE_OPTIONS $NODE_RED_OPTIONS
 KillSignal=SIGINT
 Restart=on-failure
