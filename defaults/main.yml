@@ -4,9 +4,13 @@ nodered_port: 2880               # Node-Red defaults to 1880, evading to a diffe
 nodered_ip: ""                   # Empty string (default) to listen on all interfaces, 127.0.0.1 to listen locally.
 nodered_default_adminperm: "*"   # Possible values are '*' or 'read'.
 
-nodered_packages:
+nodered_global_packages: []
+
+nodered_local_packages:
+#  - node-red-contrib-gpio
   - node-red-contrib--cron-pkjq
   - node-red-contrib-browser-utils
+  - node-red-contrib-calc
   - node-red-contrib-deadmanswitch
   - node-red-contrib-edge-trigger
   - node-red-contrib-ftp-sftp
@@ -19,42 +23,25 @@ nodered_packages:
   - node-red-contrib-moment
   - node-red-contrib-mqtt-broker
   - node-red-contrib-mssql-plus
-  - node-red-contrib-mysensors
   - node-red-contrib-onvif
   - node-red-contrib-os
   - node-red-contrib-play-audio
-  - node-red-contrib-postgres
+  - node-red-contrib-ttn
+  - node-red-contrib-zeromq
   - node-red-contrib-python3-function
   - node-red-contrib-pythonshell
   - node-red-contrib-redis
+  - node-red-contrib-spreadsheet-in
   - node-red-contrib-string
-  - node-red-contrib-viseo-ethjs
-  - node-red-contrib-viseo-file
-  - node-red-contrib-viseo-google-spreadsheet
-  - node-red-contrib-viseo-log
-  - node-red-contrib-viseo-loop
-  - node-red-contrib-viseo-qrcode
-  - node-red-contrib-viseo-trello
   - node-red-node-base64
   - node-red-node-daemon
-  - node-red-node-email
-  - node-red-node-feedparser
   - node-red-node-google
   - node-red-node-mysql
   - node-red-node-openweathermap
   - node-red-node-ping
   - node-red-node-random
-  - node-red-node-rbe
   - node-red-node-watson
   - node-red-node-wol
-
-nodered_unsafe_packages:
-  - node-red-contrib-zeromq
-  - node-red-contrib-mysensors
-
-nodered_local_packages:
-  - node-red-contrib-gpio
-  - node-red-contrib-ttn
 
 nodered_dependencies:
   - libavahi-compat-libdnssd-dev

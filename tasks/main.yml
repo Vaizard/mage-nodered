@@ -30,11 +30,6 @@
 - name: "Install Node-RED node.js package globally. Takes a few minutes."
   command: npm install -g --unsafe-perm node-red node-red-admin
 
-- name: "Install Node-RED packages (flows, nodes) requiring unsafe-perm"
-  command: "npm install -g --unsafe-perm {{ item }}"
-  with_items: "{{ nodered_unsafe_packages }}"
-
-
 # TODO: replace the above line, needs ansible 2.8
 # - name: Install "node-red" node.js package. Takes a few minutes!
 #   npm:
@@ -48,26 +43,36 @@
     name: "{{ item }}"
     state: latest
     global: yes
-  with_items: "{{ nodered_packages }}"
+  with_items: "{{ nodered_global_packages }}"
 
 - name: "Get password hashes for admin users"
   shell: echo "{{ item.pass }}" | node-red-admin hash-pw | sed -n 1p | sed 's/[^ ]* //'
   register: admins
   with_items: "{{ nodered_admin_users }}"
+  tags: [ 'configuration' ]
 
 - name: "Get password hash for node user"
   shell: echo "{{ nodered_nodeauth_pass }}" | node-red-admin hash-pw | sed -n 1p | sed 's/[^ ]* //'
   register: nodeauth
+  tags: [ 'configuration' ]
 
-#- debug: var=nodeauth
+- debug: var=nodeauth
+  tags: [ 'configuration' ]
+
+- name: Setup a systemd service for node-red
+  template: src=nodered.service.j2 dest=/lib/systemd/system/node-red.service
+  tags: [ 'configuration' ]
 
 - name: Enable and start the node-red systemd service
   systemd: name=node-red enabled=yes state=started
+  tags: [ 'configuration' ]
 
 - name: "Install Node-RED packages (flows, nodes) requiring local installation"
-  command: "npm install --unsafe-perm {{ item }}"
-  args:
-    chdir: /home/node-red/.node-red
+  npm:
+    name: "{{ item }}"
+    state: latest
+    global: no
+    path: /home/node-red/.node-red
   with_items: "{{ nodered_local_packages }}"
 
 - name: Configure settings.js
@@ -80,26 +85,27 @@
               type: "credentials",
               users: [
               {%- for loopitem in admins.results %}{
-                  username: "{{ loopitem._ansible_item_label.user }}",
+                  username: "{{ loopitem.item.user }}",
                   password: "{{ loopitem.stdout }}",
-                  permissions: "{{ loopitem._ansible_item_label.perm | default(nodered_default_adminperm) }}"
+                  permissions: "{{ loopitem.item.perm | default(nodered_default_adminperm) }}"
               }
               {%- if not loop.last %},{% endif %}
               {% endfor %}
           ]
           },
+
           {% if nodered_nodeauth_user | length and nodered_nodeauth_pass | length %}httpNodeAuth: {user:"{{ nodered_nodeauth_user }}",pass:"{{ nodeauth.stdout }}"},{% endif %}
+  tags: [ 'configuration' ]
 
 - name: Configure bind host
   blockinfile:
     path: /home/node-red/.node-red/settings.js
     insertafter: '    //uiHost: "127.0.0.1",'
-    marker: "    // {mark} ANSIBLE MANAGED BLOCK - credentials"
+    marker: "    // {mark} ANSIBLE MANAGED BLOCK - bind ip"
     block: |2
           {% if nodered_ip and nodered_ip | length > 0 %}uiHost: "{{ nodered_ip }}",{% endif %}
-
-- name: Setup a systemd service for node-red
-  template: src=nodered.service.j2 dest=/lib/systemd/system/node-red.service
+  tags: [ 'configuration' ]
 
 - name: Restart node-RED
   systemd: name=node-red state=restarted daemon_reload=yes
+  tags: [ 'configuration' ]
