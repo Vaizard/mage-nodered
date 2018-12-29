@@ -20,6 +20,7 @@ nodered_local_packages:
   - node-red-contrib-http-request
   - node-red-contrib-httpauth
   - node-red-contrib-matrixbot
+  - node-red-contrib-md5
   - node-red-contrib-moment
   - node-red-contrib-mqtt-broker
   - node-red-contrib-mssql-plus
@@ -33,6 +34,7 @@ nodered_local_packages:
   - node-red-contrib-redis
   - node-red-contrib-spreadsheet-in
   - node-red-contrib-string
+  - node-red-contrib-web-watch
   - node-red-node-base64
   - node-red-node-daemon
   - node-red-node-google
