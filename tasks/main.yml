@@ -13,7 +13,7 @@
     state: present
 
 - name: Install node-red dependencies
-  action: apt pkg="{{ [ 'build-essential', 'nodejs' ] }}" state=latest update_cache=yes
+  action: apt pkg="{{ nodered_dependencies + [ 'nodejs' ] }}" state=latest update_cache=yes
 
 - name: Create non-priviledged user to run node-red
   user: >
